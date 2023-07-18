@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 
 
 def image_upload_path(instance, filename):
@@ -37,6 +38,11 @@ class Comment(models.Model):
 
 
 # class Reaction(models.Model):
+#     class ReactionType(models.TextChoices):
+#         LIKE = "LIKE", _("LIKE")
+#         DISLIKE = "DISLIKE", _("DISLIKE")
+
+#     type = models.CharField(choices=ReactionType.choices, max_length=15)
 #     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="reactions")
 #     key = models.CharField(max_length=10, blank=True, editable=False)
 

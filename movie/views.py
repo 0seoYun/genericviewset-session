@@ -60,11 +60,15 @@ class MovieViewSet(viewsets.ModelViewSet):
 
     @action(methods=["GET"], detail=False)
     def recommend(self, request):
-        ran_movie = self.get_queryset().order_by("?")[:1]
-        ran_movie_serializer = MovieListSerializer(
-            ran_movie, many=True, context={"request": request}
-        )
+        ran_movie = self.get_queryset().order_by("?").first()
+        ran_movie_serializer = MovieListSerializer(ran_movie)
         return Response(ran_movie_serializer.data)
+
+    # @action(GET 메서드, detail은 False)
+    # def recommend(self, request):
+    #   ran_movie = get_queryset()로 QuerySet 가져오고, 무작위 정렬, 첫번째 객체만 가져오기
+    #   ran_movie_serializer = MovieListSerializer(ran_movie)
+    #   return 직렬화된 영화 데이터 담은 Response
 
 
 class CommentViewSet(
