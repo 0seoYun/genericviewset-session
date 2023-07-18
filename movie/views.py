@@ -2,6 +2,10 @@ from rest_framework import viewsets, mixins
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from .permissions import IsOwnerOrReadOnly
+from rest_framework.decorators import action
+from django.utils import timezone
 
 from .models import Movie, Comment, Tag
 from .serializers import (
@@ -14,20 +18,12 @@ from .serializers import (
 
 class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
+    # queryset = Movie.objects.filter(created_at__gte=timezone.now())
 
     def get_serializer_class(self):
         if self.action == "list":
             return MovieListSerializer
-        else:
-            return MovieSerializer
-
-    # def get_serializer_class(self):
-    #     만약 list 메소드라면 :
-    #         MovieListSerializer 반환
-    #     아니면 :
-    #         MovieSerializer 반환
-
-    # serializer_class = MovieSerializer
+        return MovieSerializer
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -57,6 +53,19 @@ class MovieViewSet(viewsets.ModelViewSet):
 
         movie.save()
 
+    def get_permissions(self):
+        if self.action in ["update", "destroy"]:
+            return [IsAdminUser()]
+        return []
+
+    @action(methods=["GET"], detail=False)
+    def recommend(self, request):
+        ran_movie = self.get_queryset().order_by("?")[:1]
+        ran_movie_serializer = MovieListSerializer(
+            ran_movie, many=True, context={"request": request}
+        )
+        return Response(ran_movie_serializer.data)
+
 
 class CommentViewSet(
     viewsets.GenericViewSet,
@@ -67,23 +76,27 @@ class CommentViewSet(
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
+    def get_permissions(self):
+        if self.action in ["update", "destroy"]:
+            return [IsOwnerOrReadOnly()]
+        return []
+
+    # def 동적으로 권한 설정 가능 메서드:
+    #   만약 액션이 update, destroy라면:
+    #       IsOwnerOrReadOnly 권한 클래스의 인스턴스를 요소로 갖는 리스트 반환
+    #   그 외에는 빈 리스트 반환
+
 
 class MovieCommentViewSet(
     viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin
 ):
-    # queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         movie = self.kwargs.get("movie_id")
         queryset = Comment.objects.filter(movie_id=movie)
         return queryset
-
-    # def list(self, request, movie_id=None):
-    #     movie = get_object_or_404(Movie, id=movie_id)
-    #     queryset = self.filter_queryset(self.get_queryset().filter(movie=movie))
-    #     serializer = self.get_serializer(queryset, many=True)
-    #     return Response(serializer.data)
 
     def create(self, request, movie_id=None):
         movie = get_object_or_404(Movie, id=movie_id)
