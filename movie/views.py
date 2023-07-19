@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from .permissions import IsOwnerOrReadOnly
 from rest_framework.decorators import action
 from django.utils import timezone
+from rest_framework import status
 
 from .models import Movie, Comment, Tag
 from .serializers import (
@@ -64,11 +65,12 @@ class MovieViewSet(viewsets.ModelViewSet):
         ran_movie_serializer = MovieListSerializer(ran_movie)
         return Response(ran_movie_serializer.data)
 
-    # @action(GET 메서드, detail은 False)
-    # def recommend(self, request):
-    #   ran_movie = get_queryset()로 QuerySet 가져오고, 무작위 정렬, 첫번째 객체만 가져오기
-    #   ran_movie_serializer = MovieListSerializer(ran_movie)
-    #   return 직렬화된 영화 데이터 담은 Response
+    @action(methods=["GET"], detail=True)
+    def test(self, request, pk=None):
+        test_movie = self.get_object()
+        test_movie.num += 1
+        test_movie.save(update_fields=["num"])
+        return Response()
 
 
 class CommentViewSet(
@@ -84,11 +86,6 @@ class CommentViewSet(
         if self.action in ["update", "destroy"]:
             return [IsOwnerOrReadOnly()]
         return []
-
-    # def 동적으로 권한 설정 가능 메서드:
-    #   만약 액션이 update, destroy라면:
-    #       IsOwnerOrReadOnly 권한 클래스의 인스턴스를 요소로 갖는 리스트 반환
-    #   그 외에는 빈 리스트 반환
 
 
 class MovieCommentViewSet(

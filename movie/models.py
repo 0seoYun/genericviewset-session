@@ -20,6 +20,7 @@ class Movie(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     tag = models.ManyToManyField(Tag, blank=True)
     image = models.ImageField(upload_to=image_upload_path, blank=True, null=True)
+    num = models.PositiveSmallIntegerField(default=0)
 
 
 class Comment(models.Model):
@@ -35,16 +36,3 @@ class Comment(models.Model):
     content = models.TextField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-
-# class Reaction(models.Model):
-#     class ReactionType(models.TextChoices):
-#         LIKE = "LIKE", _("LIKE")
-#         DISLIKE = "DISLIKE", _("DISLIKE")
-
-#     type = models.CharField(choices=ReactionType.choices, max_length=15)
-#     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="reactions")
-#     key = models.CharField(max_length=10, blank=True, editable=False)
-
-#     def __str__(self):
-#         return f"{self.movie}/{self.key}"

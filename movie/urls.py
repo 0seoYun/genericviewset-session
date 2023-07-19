@@ -18,6 +18,7 @@ movie_comment_router.register("comments", MovieCommentViewSet, basename="comment
 tag_router = routers.SimpleRouter()
 tag_router.register("tags", TagViewSet, basename="tags")
 
+
 urlpatterns = [
     path("", include(default_router.urls)),
     path("", include(comment_router.urls)),

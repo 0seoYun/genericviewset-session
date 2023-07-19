@@ -29,41 +29,15 @@ class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         fields = "__all__"
-        read_only_fields = ["id", "created_at", "updated_at", "comments"]
-
-
-# class MovieSerializer(serializers.ModelSerializer):
-#     여기에는 read_only = True 아닌 필드만 남기기
-
-#     def get_comments(self, instance):
-#         serializer = CommentSerializer(instance.comments, many=True)
-#         return serializer.data
-
-#     def get_tag(self, instance):
-#         tags = instance.tag.all()
-#         return [tag.name for tag in tags]
-
-#     class Meta:
-#         model = Movie
-#         fields = "__all__"
-#         read_only_fields = [여기에 필드 넣어주세요!]
-
-
-# class MovieListSerializer(serializers.ModelSerializer):
-#     comments_cnt 라는 이름의 필드 생성
-#     tag = serializers.SerializerMethodField()
-
-#     def get_comments_cnt(self, instance):
-#         return 코멘트의 개수
-
-#     def get_tag(self, instance):
-#         tags = instance.tag.all()
-#         return [tag.name for tag in tags]
-
-#     class Meta:
-#           모델은 Movie
-#           fields에는 id, name, created_at, updated_at, image, comments_cnt, tag
-#           id, created_at, updated_at, commments_cnt 는 읽기만 가능하게
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at",
+            "comments",
+            "likes_cnt",
+            "dislikes_cnt",
+            "num",
+        ]
 
 
 class MovieListSerializer(serializers.ModelSerializer):
@@ -88,7 +62,12 @@ class MovieListSerializer(serializers.ModelSerializer):
             "comments_cnt",
             "tag",
         ]
-        read_only_fields = ["id", "created_at", "updated_at", "comments_cnt"]
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at",
+            "comments_cnt",
+        ]
 
 
 class TagSerializer(serializers.ModelSerializer):
