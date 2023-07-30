@@ -7,6 +7,8 @@ from .permissions import IsOwnerOrReadOnly
 from rest_framework.decorators import action
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
+
 
 from .models import Movie, Comment, Tag
 from .serializers import (
@@ -19,7 +21,6 @@ from .serializers import (
 
 class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
-    # queryset = Movie.objects.filter(created_at__gte=timezone.now())
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -55,7 +56,7 @@ class MovieViewSet(viewsets.ModelViewSet):
         movie.save()
 
     def get_permissions(self):
-        if self.action in ["update", "destroy"]:
+        if self.action in ["update", "destroy", "partial_update"]:
             return [IsAdminUser()]
         return []
 
@@ -83,9 +84,28 @@ class CommentViewSet(
     serializer_class = CommentSerializer
 
     def get_permissions(self):
-        if self.action in ["update", "destroy"]:
+        if self.action in ["update", "destroy", "partial_update"]:
             return [IsOwnerOrReadOnly()]
         return []
+
+    def get_object(self):
+        obj = super().get_object()
+        return obj
+
+    # def 동적으로 권한  설장 가능한 메서드:
+    #   만약 액션이 update, destroy, partial_update 라면:
+    #       IsOwnerOrReadOnly 권한 클래스의 인스턴스를 요소로 갖는 '리스트' 반환
+    #   그 외에는 빈 리스트 반환
+
+    # def get_object(self):
+    #   obj = super().get_object()
+    #   obj 반환
+
+    # def get_object(self):
+    #     obj = super().get_object()
+    #     if not obj.writer == self.request.user:
+    #         raise PermissionDenied("You do not have permission to perform this action.")
+    #     return obj
 
 
 class MovieCommentViewSet(

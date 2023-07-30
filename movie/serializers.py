@@ -17,7 +17,9 @@ class CommentSerializer(serializers.ModelSerializer):
 class MovieSerializer(serializers.ModelSerializer):
     tag = serializers.SerializerMethodField()
     image = serializers.ImageField(use_url=True, required=False)
+    comments = serializers.SerializerMethodField()
 
+    # 단, comments는 read_only=True이지만, SerializerMethodField이므로 유지!
     def get_comments(self, instance):
         serializer = CommentSerializer(instance.comments, many=True)
         return serializer.data
@@ -34,8 +36,6 @@ class MovieSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "comments",
-            "likes_cnt",
-            "dislikes_cnt",
             "num",
         ]
 
